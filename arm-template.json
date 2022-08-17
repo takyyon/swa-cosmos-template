@@ -1,0 +1,144 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "subscriptionId": {
+            "type": "String"
+        },
+        "resourceGroupName": {
+            "type": "String"
+        },
+        "location": {
+            "type": "String"
+        },
+        "staticSiteName": {
+            "type": "String"
+        },
+        "staticSiteSku": {
+            "type": "String"
+        },
+        "staticSiteSkuCode": {
+            "type": "String"
+        },
+        "staticSiteAppLocation": {
+            "type": "String"
+        },
+        "staticSiteApiLocation": {
+            "type": "String"
+        },
+        "staticSiteAppArtifactLocation": {
+            "type": "String"
+        },
+        "repoUrl": {
+            "type": "String"
+        },
+        "branch": {
+            "type": "String"
+        },
+        "repositoryToken": {
+            "type": "SecureString"
+        },
+        "cosmosDatabaseAccountName": {
+            "type": "String"
+        },
+        "cosmosDatabaseName": {
+            "type": "String"
+        },
+        "connectionStringName": {
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Web/staticSites",
+            "apiVersion": "2021-01-15",
+            "name": "[parameters('staticSiteName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "Tier": "[parameters('staticSiteSku')]",
+                "Name": "[parameters('staticSiteSkuCode')]"
+            },
+            "properties": {
+                "name": "[parameters('staticSiteName')]",
+                "repositoryUrl": "[parameters('repoUrl')]",
+                "branch": "[parameters('branch')]",
+                "repositoryToken": "[parameters('repositoryToken')]",
+                "buildProperties": {
+                    "appLocation": "[parameters('staticSiteAppLocation')]",
+                    "apiLocation": "[parameters('staticSiteApiLocation')]",
+                    "appArtifactLocation": "[parameters('staticSiteAppArtifactLocation')]"
+                }
+            },
+            "resources": [
+                {
+                    "type": "config",
+                    "apiVersion": "2021-01-15",
+                    "name": "appsettings",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/staticSites', parameters('staticSiteName'))]"
+                    ],
+                    "properties": {
+                        "connectionStringName": "[concat('mongodb://', parameters('cosmosDatabaseAccountName'), ':', listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts',parameters('cosmosDatabaseAccountName')), '2020-04-01').primaryMasterKey, '@',parameters('cosmosDatabaseAccountName'), '.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@',parameters('cosmosDatabaseAccountName'), '@')]"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "Microsoft.DocumentDb/databaseAccounts",
+            "apiVersion": "2022-05-15-preview",
+            "name": "[parameters('cosmosDatabaseAccountName')]",
+            "location": "[parameters('location')]",
+            "kind": "MongoDB",
+            "properties": {
+                "databaseAccountOfferType": "Standard",
+                "locations": [
+                    {
+                        "failoverPriority": 0,
+                        "locationName": "[parameters('location')]"
+                    }
+                ],
+                "backupPolicy": {
+                    "type": "Periodic",
+                    "periodicModeProperties": {
+                        "backupIntervalInMinutes": 240,
+                        "backupRetentionIntervalInHours": 8,
+                        "backupStorageRedundancy": "Geo"
+                    }
+                },
+                "isVirtualNetworkFilterEnabled": false,
+                "virtualNetworkRules": [],
+                "ipRules": [],
+                "dependsOn": [],
+                "capabilities": [
+                    {
+                        "name": "EnableMongo"
+                    },
+                    {
+                        "name": "DisableRateLimitingResponses"
+                    }
+                ],
+                "apiProperties": {
+                    "serverVersion": "4.0"
+                },
+                "enableFreeTier": false
+            },
+            "resources": [
+                {
+                    "type": "mongodbDatabases",
+                    "apiVersion": "2021-04-15",
+                    "name": "[parameters('cosmosDatabaseName')]",
+                    "dependsOn": [
+                        "[concat('Microsoft.DocumentDb/databaseAccounts/', parameters('cosmosDatabaseAccountName'))]"
+                    ],
+                    "properties": {
+                        "resource": {
+                            "id": "[parameters('cosmosDatabaseName')]"
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}
