@@ -1,51 +1,100 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
+    "metadata": {
+        "title": "Deploys Static Web App, and Azure Cosmos Database",
+        "description": "This template deploys a single Azure Comos Database, and a React Static Web App"
+    },
     "parameters": {
-        "subscriptionId": {
-            "type": "String"
-        },
-        "resourceGroupName": {
-            "type": "String"
-        },
         "location": {
-            "type": "String"
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources."
+            }
         },
         "staticSiteName": {
-            "type": "String"
+            "type": "string",
+            "defaultValue": "[format('swa-{0}', uniqueString(resourceGroup().id))]",
+            "minLength": 2,
+            "metadata": {
+                "description": "static web app name"
+            }
         },
         "staticSiteSku": {
-            "type": "String"
+            "type": "string",
+            "defaultValue": "Standard",
+            "metadata": {
+                "description": "The SKU of Static web app."
+            }
         },
         "staticSiteSkuCode": {
-            "type": "String"
+            "type": "string",
+            "defaultValue": "Standard",
+            "metadata": {
+                "description": "The SKU code of Static web app."
+            }
         },
         "staticSiteAppLocation": {
-            "type": "String"
+            "type": "string",
+            "defaultValue": "/",
+            "metadata": {
+                "description": "The app location for the repo used to create static web app"
+            }
         },
         "staticSiteApiLocation": {
-            "type": "String"
+            "type": "string",
+            "defaultValue": "api",
+            "metadata": {
+                "description": "The api location for the repo used to create static web app"
+            }
         },
         "staticSiteAppArtifactLocation": {
-            "type": "String"
+            "type": "string",
+            "defaultValue": "build",
+            "metadata": {
+                "description": "The app artifact location for the repo used to create static web app"
+            }
         },
         "repoUrl": {
-            "type": "String"
+            "type": "string",
+            "metadata": {
+                "description": "The repo url used to deploy static web app"
+            }
         },
         "branch": {
-            "type": "String"
+            "type": "string",
+            "metadata": {
+                "description": "The branch of the repo used to deploy static web app"
+            }
         },
         "repositoryToken": {
-            "type": "SecureString"
+            "type": "secureString",
+            "metadata": {
+                "description": "The github token of the repo's owner to deploy static web app"
+            }
         },
         "cosmosDatabaseAccountName": {
-            "type": "String"
+            "type": "string",
+            "defaultValue": "[format('swacosmos{0}', uniqueString(resourceGroup().id))]",
+            "minLength": 2,
+            "metadata": {
+                "description": "cosmos db name"
+            }
         },
         "cosmosDatabaseName": {
-            "type": "String"
+            "type": "string",
+            "defaultValue": "AZURE_COSMOS_DATABASE_NAME",
+            "metadata": {
+                "description": "cosmos connectring string"
+            }
         },
         "connectionStringName": {
-            "type": "String"
+            "type": "string",
+            "defaultValue": "AZURE_COSMOS_CONNECTION_STRING",
+            "metadata": {
+                "description": "cosmos connectring string"
+            }
         }
     },
     "variables": {},
