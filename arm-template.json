@@ -85,12 +85,19 @@
         },
         "cosmosDatabaseName": {
             "type": "string",
+            "defaultValue": "cosmosdb",
+            "metadata": {
+                "description": "cosmos connectring string"
+            }
+        },
+        "cosmosDatabaseConnectionStringName": {
+            "type": "string",
             "defaultValue": "AZURE_COSMOS_DATABASE_NAME",
             "metadata": {
                 "description": "cosmos connectring string"
             }
         },
-        "connectionStringName": {
+        "cosmosConnectionStringName": {
             "type": "string",
             "defaultValue": "AZURE_COSMOS_CONNECTION_STRING",
             "metadata": {
@@ -130,7 +137,8 @@
                         "[resourceId('Microsoft.Web/staticSites', parameters('staticSiteName'))]"
                     ],
                     "properties": {
-                        "connectionStringName": "[concat('mongodb://', parameters('cosmosDatabaseAccountName'), ':', listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts',parameters('cosmosDatabaseAccountName')), '2020-04-01').primaryMasterKey, '@',parameters('cosmosDatabaseAccountName'), '.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@',parameters('cosmosDatabaseAccountName'), '@')]"
+                        "parameters('cosmosConnectionStringName')": "[concat('mongodb://', parameters('cosmosDatabaseAccountName'), ':', listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts',parameters('cosmosDatabaseAccountName')), '2020-04-01').primaryMasterKey, '@',parameters('cosmosDatabaseAccountName'), '.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@',parameters('cosmosDatabaseAccountName'), '@')]",
+                        "parameters('cosmosDatabaseConnectionStringName')": "parameters('cosmosDatabaseName')"
                     }
                 }
             ]
